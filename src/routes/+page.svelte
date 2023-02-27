@@ -1,16 +1,28 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <script>
+	import { nanoid } from 'nanoid';
+	import { Todo } from './todo';
 	import { todos } from '../stores.js';
-	let newTodo = '';
+	import { completedTodos } from '../stores.js';
+
+	let newTodoTitle = '';
 
 	function handleAdd() {
+		let newTodo = new Todo(nanoid(), newTodoTitle, false);
 		$todos = [newTodo, ...$todos];
-		newTodo = '';
+		newTodoTitle = '';
 	}
 
 	function handleRemove(index) {
 		$todos.splice(index, 1);
 		$todos = $todos;
+		console.log($todos);
+	}
+
+	function handleComplete(id) {
+		let completedTodo = $todos.splice(id, 1);
+		$todos = $todos;
+		$completedTodos = [completedTodo, ...$completedTodos];
 	}
 </script>
 
@@ -21,23 +33,23 @@
 			<input
 				required
 				type="text"
-				bind:value={newTodo}
+				bind:value={newTodoTitle}
 				placeholder="New todo…"
-				class="w-full rounded-sm border border-neutral-400 py-1 px-2 text-sm placeholder-neutral-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+				class="w-full rounded-sm border border-neutral-400 py-1 px-2  placeholder-neutral-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
 			/>
 			<button
 				type="submit"
-				class="flex items-center justify-center rounded-sm bg-blue-600 px-3 text-sm text-white shadow-sm"
+				class="flex items-center justify-center rounded-sm bg-blue-600 px-3  text-white shadow-sm"
 				>Add</button
 			>
 		</div>
 	</form>
 	<ul class="flex flex-col gap-1">
-		{#each $todos as todo, index (index)}
-			<li class="group relative flex justify-between gap-4 py-1 text-sm">
+		{#each $todos as todo, index (todo.id)}
+			<li class="group relative flex justify-between gap-4 py-1 ">
 				<div class="flex items-center gap-2">
-					<input type="checkbox" />
-					{todo}
+					<input type="checkbox" on:change={() => handleComplete(todo.id)} />
+					{todo.title}
 				</div>
 				<button on:click={() => handleRemove(index)} class="invisible group-hover:visible">
 					<span class="text-red-700 underline">Delete</span>
